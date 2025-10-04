@@ -37,6 +37,41 @@ export const userProfile = async (req: AuthRequest, res: Response) => {
   }
 };
 
+// PUT /user/profile
+export const updateProfile = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: "Unauthorized" });
+    }
+
+    const { name, gender, designation } = req.body;
+
+    // Validate required fields (optional)
+    if (!name && !gender && !designation) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "At least one field must be provided to update" });
+    }
+
+    const updateData: Partial<{ name: string; gender: string; designation: string }> = {};
+    if (name) updateData.name = name;
+    if (gender) updateData.gender = gender;
+    if (designation) updateData.designation = designation;
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select("-password");
+
+    res.status(StatusCodes.OK).json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+  }
+};
+
+
 // GET /user/site/dashboard
 export const userSiteDashboard = async (req: AuthRequest, res: Response) => {
   try {
