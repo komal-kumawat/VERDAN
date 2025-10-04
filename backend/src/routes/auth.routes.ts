@@ -65,8 +65,8 @@ router.post("/signup", async (req: Request, res: Response) => {
       expiresIn: (process.env.REFRESH_TOKEN_EXPIRES as SignOptions["expiresIn"]) || "7d",
     };
 
-    const access = jwt.sign({ sub: user._id }, process.env.JWT_ACCESS_SECRET as Secret, accessOptions);
-    const refresh = jwt.sign({ sub: user._id }, process.env.JWT_REFRESH_SECRET as Secret, refreshOptions);
+    const access = jwt.sign({ sub: user._id , role:user.role }, process.env.JWT_ACCESS_SECRET as Secret, accessOptions);
+    const refresh = jwt.sign({ sub: user._id  , role:user.role}, process.env.JWT_REFRESH_SECRET as Secret, refreshOptions);
 
     res.cookie("refreshToken", refresh, {
       httpOnly: true,
@@ -124,8 +124,8 @@ router.post("/signin", async (req: Request, res: Response) => {
       expiresIn: (process.env.REFRESH_TOKEN_EXPIRES as SignOptions["expiresIn"]) || "7d",
     };
 
-    const access = jwt.sign({ sub: user._id }, process.env.JWT_ACCESS_SECRET as Secret, accessOptions);
-    const refresh = jwt.sign({ sub: user._id }, process.env.JWT_REFRESH_SECRET as Secret, refreshOptions);
+    const access = jwt.sign({ sub: user._id  , role:user.role}, process.env.JWT_ACCESS_SECRET as Secret, accessOptions);
+    const refresh = jwt.sign({ sub: user._id , role:user.role }, process.env.JWT_REFRESH_SECRET as Secret, refreshOptions);
 
     res.cookie("refreshToken", refresh, {
       httpOnly: true,
