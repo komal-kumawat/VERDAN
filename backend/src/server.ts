@@ -8,7 +8,7 @@ import adminRoute from "./routes/admin.routes.js";
 dotenv.config();
 
 const MONGO_URI = process.env.MONGO_URI;
-const PORT = process.env.PORT || 8000;
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.json())

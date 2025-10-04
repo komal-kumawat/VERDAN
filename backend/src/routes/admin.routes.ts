@@ -1,15 +1,22 @@
-import { Router, type NextFunction, type Response } from "express";
-import { addTeam, getTeam, siteDashboard } from "../controllers/admin.controller.js";
-import { authMiddleware, type AuthRequest } from "../middleware/auth.middleware.js";
-import { StatusCodes } from "http-status-codes";
+import { Router } from "express";
+import {
+  getAllSites,
+  addSite,
+  getTeamForSite,
+  addTeamMember,
+  verifyTree,
+} from "../controllers/admin.controller.js";
+import { authMiddleware } from "../middleware/auth.middleware.js";
 import { adminOnly } from "../middleware/role.middleware.js";
-const adminRoute = Router();
-adminRoute.use(authMiddleware , adminOnly);
 
+const router = Router();
 
+router.use(authMiddleware, adminOnly);
 
-adminRoute.get("/site/dashboard" , siteDashboard);
-adminRoute.get("/site/team", getTeam);
-adminRoute.post("/site/team/add" , addTeam);
+router.get("/sites", getAllSites);
+router.post("/sites/add", addSite);
+router.get("/site/team", getTeamForSite);
+router.post("/site/team/add", addTeamMember);
+router.patch("/verify/:treeId", verifyTree);
 
-export default adminRoute;
+export default router;

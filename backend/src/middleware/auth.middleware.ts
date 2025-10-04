@@ -55,3 +55,23 @@ export async function authMiddleware(
       .json({ message: "Invalid or expired token" });
   }
 }
+
+export function requireAdmin(
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction
+) {
+  if (!req.user) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: "Authentication required" });
+  }
+
+  if (req.user.role !== "admin") {
+    return res
+      .status(StatusCodes.FORBIDDEN)
+      .json({ message: "Admin access only" });
+  }
+
+  next();
+}

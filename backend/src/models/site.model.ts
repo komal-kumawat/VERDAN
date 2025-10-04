@@ -1,50 +1,33 @@
-import { Document } from "mongoose";
-import { Schema, model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ISite extends Document {
-    name: string;
-    address: string;
-    avatar: string;
-    coordinates: {
-        lat: number;
-        lng: number;
-    };
-    status: "healthy"|"unhealthy";
+  name: string;
+  address: string;
+  image?: string;
+  coordinates: {
+    lat: number;
+    lng: number;
+  };
+  status: "active" | "inactive";
+  type?: string;
+  teamMembers: mongoose.Types.ObjectId[];
 }
 
-
-const siteSchema = new Schema<ISite>(
-    {
-        name: {
-            type: String,
-            required: [true, "Site name is required"],
-            trim: true,
-        },
-        address: {
-            type: String,
-            required: [true, "Address is required"],
-        },
-        avatar: {
-            type: String,
-            default: "", // optional, can store image URL
-        },
-        coordinates: {
-            lat: {
-                type: Number,
-                required: true,
-            },
-            lng: {
-                type: Number,
-                required: true,
-            },
-        },
-        status: {
-            type: String,
-            enum: ["healthy", "unhealthy"],
-            default: "healthy",
-        },
+const SiteSchema = new Schema<ISite>(
+  {
+    name: { type: String, required: true },
+    address: { type: String, required: true },
+    image: String,
+    coordinates: {
+      lat: { type: Number, required: true },
+      lng: { type: Number, required: true },
     },
-    { timestamps: true }
+    status: { type: String, enum: ["active", "inactive"], default: "active" },
+    type: String,
+    teamMembers: [{ type: Schema.Types.ObjectId, ref: "User" }],
+  },
+  { timestamps: true }
 );
+const Site =  mongoose.model<ISite>("Site", SiteSchema);
 
-export const Site = model<ISite>("Site", siteSchema);
+export default Site;

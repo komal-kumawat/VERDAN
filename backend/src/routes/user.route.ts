@@ -1,16 +1,21 @@
 import { Router } from "express";
+import {
+  getUserDashboard,
+  getUserProfile,
+  getSiteDashboard,
+  getTreeDetails,
+  addTree,
+} from "../controllers/user.controller.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
-import { userDashboard, userProfile, userSiteDashboard, UpdateDashboard, AddTree , updateProfile } from "../controllers/user.controller.js";
 
-const userRoute = Router();
+const router = Router();
 
-userRoute.use(authMiddleware); // all routes after this will have req.user
+router.use(authMiddleware);
 
-userRoute.get("/dashboard", userDashboard);
-userRoute.get("/profile", userProfile);
-userRoute.put("/profile" , updateProfile);
-userRoute.get("/site/dashboard", userSiteDashboard);
-userRoute.put("/site/dashboard/:id", UpdateDashboard);
-userRoute.post("/site/dashboard/add", AddTree);
+router.get("/dashboard", getUserDashboard);
+router.get("/profile", getUserProfile);
+router.get("/site/dashboard", getSiteDashboard);
+router.get("/site/dashboard/:treeId", getTreeDetails);
+router.post("/site/dashboard/add", addTree);
 
-export default userRoute;
+export default router;

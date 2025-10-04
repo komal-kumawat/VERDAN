@@ -1,101 +1,120 @@
-import { type Request, type Response } from "express";
+import {type Request, type Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import User from "../models/user.model.js";
-import { Site } from "../models/site.model.js";
+import { Types } from "mongoose";
 import bcrypt from "bcryptjs";
+import Tree from "../models/tree.model.js";
+import Site from "../models/site.model.js";
+import User from "../models/user.model.js";
 import { sendEmail } from "../utils/email.utils.js";
 
-// GET /site/dashboard
-export const siteDashboard = async (req: Request, res: Response) => {
+// Get all sites (with team members)
+export const getAllSites = async (req: Request, res: Response) => {
   try {
-    const sites = await Site.find();
-    const totalSites = sites.length;
-    const totalUsers = await User.countDocuments();
+    const sites = await Site.find().populate("teamMembers", "-password");
+    res.status(StatusCodes.OK).json(sites);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
+  }
+};
 
-    res.status(StatusCodes.OK).json({
-      totalSites,
-      totalUsers,
-      sites,
+// Add a new site
+export const addSite = async (req: Request, res: Response) => {
+  try {
+    const { name, address, image, coordinates, status, type } = req.body;
+
+    const site = await Site.create({
+      name,
+      address,
+      image,
+      coordinates,
+      status,
+      type,
     });
+
+    res.status(StatusCodes.CREATED).json(site);
   } catch (err) {
     console.error(err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
   }
 };
 
-// GET /site/team
-export const getTeam = async (req: Request, res: Response) => {
+export const getTeamForSite = async (req: Request, res: Response) => {
   try {
-    const users = await User.find().select("-password");
-    res.status(StatusCodes.OK).json(users);
+    const siteId = req.query.siteId as string;
+    if (!siteId)
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Missing siteId" });
+
+    const site = await Site.findById(siteId).populate(
+      "teamMembers",
+      "-password"
+    );
+    if (!site)
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Site not found" });
+
+    res.status(StatusCodes.OK).json(site.teamMembers);
   } catch (err) {
     console.error(err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
   }
 };
 
-// POST /site/team/add
-export const addTeam = async (req: Request, res: Response) => {
+export const addTeamMember = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role, siteId, gender, designation } = req.body;
+    const { name, email, role, siteId, gender, designation } = req.body;
+    if (!name || !email || !role || !siteId || !designation)
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Missing required fields" });
 
-    if (!name || !email || !password || !role || !siteId || !gender || !designation) {
-      return res.status(StatusCodes.BAD_REQUEST).json({ message: "All fields are required" });
-    }
+    const existing = await User.findOne({ email });
+    if (existing)
+      return res
+        .status(StatusCodes.CONFLICT)
+        .json({ message: "Email already registered" });
 
-    const existingUser = await User.findOne({ email });
-
-    if (existingUser) {
-      // Update existing user's site or role if needed
-      existingUser.siteId = siteId;
-      existingUser.role = role;
-      await existingUser.save();
-
-      // Send email notification
-      await sendEmail(
-        existingUser.email,
-        "New Site Assignment",
-        `
-          <h2>Hello ${existingUser.name}!</h2>
-          <p>You have been assigned to a new site/admin.</p>
-          <p><strong>Email:</strong> ${existingUser.email}</p>
-          <p><strong>Assigned Role:</strong> ${existingUser.role}</p>
-        `
-      );
-
-      return res.status(StatusCodes.OK).json({
-        message: "Existing user assigned to new site/admin and email sent",
-        user: existingUser,
-      });
-    }
-
-    // Create new user
+    const password = Math.random().toString(36).slice(-8);
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       name,
       email,
-      password: hashedPassword,
       role,
-      siteId,
-      gender,
+      siteId: new Types.ObjectId(siteId),
+      password: hashedPassword,
+      gender: gender || "other",
       designation,
     });
 
-    // Send email with login credentials
-    await sendEmail(
-      email,
-      "Welcome to the Team!",
-      `
-        <h2>Hello ${name}!</h2>
-        <p>Your account has been created.</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Password:</strong> ${password}</p>
-        <p><strong>Role:</strong> ${role}</p>
-      `
-    );
+    await Site.findByIdAndUpdate(siteId, { $push: { teamMembers: user._id } });
+
+    const site = await Site.findById(siteId);
+    if (site) {
+      const html = `
+        <h3>Welcome to ${site.name}</h3>
+        <p>Your account has been created by the admin.</p>
+        <ul>
+          <li>Email: ${email}</li>
+          <li>Password: ${password}</li>
+          <li>Role: ${role}</li>
+        </ul>
+        <p>Please login and change your password.</p>
+      `;
+      await sendEmail(email, `Your account for ${site.name}`, html);
+    }
 
     res.status(StatusCodes.CREATED).json({
-      message: "Team member added successfully and email sent",
+      message: "User created and email sent successfully",
       user: {
         id: user._id,
         name: user.name,
@@ -108,6 +127,35 @@ export const addTeam = async (req: Request, res: Response) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: "Server error" });
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
+  }
+};
+
+export const verifyTree = async (req: Request, res: Response) => {
+  try {
+    const { treeId } = req.params;
+    if (!treeId)
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: "Missing treeId" });
+
+    const tree = await Tree.findByIdAndUpdate(
+      treeId,
+      { status: "verified" },
+      { new: true }
+    );
+    if (!tree)
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ message: "Tree not found" });
+
+    res.status(StatusCodes.OK).json(tree);
+  } catch (err) {
+    console.error(err);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ message: "Server error" });
   }
 };
