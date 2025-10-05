@@ -44,9 +44,9 @@ export default function Signin() {
 
       // ✅ Role-based redirection
       if (res.data.user.role.toLowerCase() === "user") {
-        navigate("/user/dashboard");
+        navigate("/dashboard");
       } else {
-        navigate("/admin/Dashboard");
+        navigate("/dashboard");
       }
     } catch (err: any) {
       const serverMsg =

@@ -1,19 +1,26 @@
 
-import { BrowserRouter, Route, Routes  } from "react-router-dom"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 import Signin from "./Pages/Signin"
 import "./App.css"
 import UserDashboard from "./Pages/UserDashboard"
 import AddSites from "./Pages/AddSite"
+import ProtectedRoute from "./ProtectedRoute"
+import UpdateSite from "./Pages/UpdateSite"
 // import UserProfile from "./Pages/UserProfile"
 const App = () => {
   return (
     <BrowserRouter>
-    <Routes>
-      <Route path="/" element= {<Signin/>}></Route>
-      <Route path="/admin/Dashboard" element = {<UserDashboard/>}></Route>
-      {/* <Route path="/user/profile" element = {<UserProfile/>}></Route> */}
-      <Route path="/admin/add" element={<AddSites/>}></Route>
-    </Routes>
+      <Routes>
+        <Route path="/" element={<Signin />}></Route>
+        {/* <Route element={<ProtectedRoute />}> */}
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/admin/sites/add" element={<AddSites />} />
+          <Route path="/admin/site/update/:siteId" element={<UpdateSite />} />
+
+        {/* </Route> */}
+        {/* <Route path="*" element={<Navigate to="/signin" replace />} /> */}
+
+      </Routes>
     </BrowserRouter>
   )
 }
