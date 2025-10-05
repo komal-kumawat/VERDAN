@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import API from "../api";
-
+import logo from "../assets/logo.svg"
 interface TeamMember {
     _id: string;
     name: string;
@@ -14,7 +14,7 @@ interface TeamMember {
 
 const SiteDashboard = () => {
     const { siteId } = useParams<{ siteId: string }>();
-    const { token, logout, user } = useAuth();
+    const { token, logout } = useAuth();
     const navigate = useNavigate();
 
     const [team, setTeam] = useState<TeamMember[]>([]);
@@ -51,7 +51,8 @@ const SiteDashboard = () => {
             {/* Navbar */}
             <nav className="bg-white shadow-sm border-b sticky top-0 z-10">
                 <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex justify-between items-center">
-                    <h1 className="text-lg sm:text-xl font-bold text-gray-800">Site Dashboard</h1>
+                    <img src={logo} alt="Verdan Logo" width={80} />
+
                     <div className="text-sm sm:text-base font-medium text-gray-600">
                         Site ID:{" "}
                         <span className="text-blue-600 font-semibold break-all">{siteId}</span>
@@ -83,8 +84,8 @@ const SiteDashboard = () => {
                                             <p className="text-sm text-gray-500">{member.email}</p>
                                             <p
                                                 className={`text-sm font-medium ${member.role === "admin"
-                                                        ? "text-green-600"
-                                                        : "text-gray-600"
+                                                    ? "text-green-600"
+                                                    : "text-gray-600"
                                                     }`}
                                             >
                                                 {member.designation || member.role}
