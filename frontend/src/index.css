@@ -1,0 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply font-sans;
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-color: #f2f7f4;
+    color: #0e0e0e;
+  }
+}
