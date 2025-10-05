@@ -6,6 +6,8 @@ import UserDashboard from "./Pages/UserDashboard"
 import AddSites from "./Pages/AddSite"
 import ProtectedRoute from "./ProtectedRoute"
 import UpdateSite from "./Pages/UpdateSite"
+import AddTeam from "./Pages/AddTeam"
+import SiteDashboard from "./Pages/SiteDashboard"
 // import UserProfile from "./Pages/UserProfile"
 const App = () => {
   return (
@@ -13,9 +15,11 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Signin />}></Route>
         {/* <Route element={<ProtectedRoute />}> */}
-          <Route path="/dashboard" element={<UserDashboard />} />
-          <Route path="/admin/sites/add" element={<AddSites />} />
-          <Route path="/admin/site/update/:siteId" element={<UpdateSite />} />
+        <Route path="/dashboard" element={<UserDashboard />} />
+        <Route path="/admin/sites/add" element={<AddSites />} />
+        <Route path="/admin/site/update/:siteId" element={<UpdateSite />} />
+        <Route path="/admin/site/:siteId/add-team" element={<AddTeam />} />
+        <Route path="/admin/site/:siteId" element={<SiteDashboard />} />
 
         {/* </Route> */}
         {/* <Route path="*" element={<Navigate to="/signin" replace />} /> */}

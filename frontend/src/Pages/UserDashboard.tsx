@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { FaUserCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import API from "../api";
 import logo from "../assets/logo.svg";
 
@@ -103,7 +103,6 @@ export default function UserDashboard() {
         navigate("/");
     };
     const handleAdd = () => navigate("/admin/site/team/add");
-    const handleUpdate = () => navigate("/admin/site/update/${site._id}");
 
     return (
         <div className="min-h-screen bg-gray-100 text-gray-900">
@@ -152,7 +151,12 @@ export default function UserDashboard() {
                                 className="p-4 rounded-xl shadow-sm bg-white border border-gray-200 flex justify-between items-center"
                             >
                                 <div>
-                                    <h2 className="text-lg font-semibold">{site.name}</h2>
+                                    <Link to={`/admin/site/${site._id}`}>
+                                        <h2 className="text-lg font-semibold text-blue-600 hover:underline">
+                                            {site.name}
+                                        </h2>
+                                    </Link>
+
                                     <div className="flex flex-col md:flex-row md:gap-10 md:py-5">
                                         <p className="text-sm text-gray-500">ID: {site._id}</p>
                                         <p className="text-sm text-gray-500">{site.address}</p>
@@ -165,14 +169,14 @@ export default function UserDashboard() {
                                 {/* Only admins can see Add/Update buttons */}
                                 {user?.role.toLowerCase() === "admin" && (
                                     <div className="flex flex-col gap-2 md:flex-row md:gap-10 md:py-5 items-center">
-                                        {user.role === "admin" &&
-                                            <button
-                                                className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-                                                onClick={handleAdd}
-                                            >
-                                                Add
-                                            </button>
-                                        }
+
+                                        <button
+                                            className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
+                                            onClick={() => navigate(`/admin/site/${site._id}/add-team`)}
+                                        >
+                                            Add
+                                        </button>
+
                                         <button
                                             className="px-3 py-1 bg-yellow-400 text-white rounded-md hover:bg-yellow-500 transition"
                                             onClick={() => navigate(`/admin/site/update/${site._id}`)}
@@ -192,7 +196,7 @@ export default function UserDashboard() {
                     <div className="w-full p-10 flex items-center justify-center">
                         <button
                             className="px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition"
-                            onClick={()=>navigate("/admin/site/add")}
+                            onClick={() => navigate("/admin/site/add")}
                         >
                             Add New Site
                         </button>
