@@ -46,7 +46,7 @@ export default function Signin() {
       if (res.data.user.role.toLowerCase() === "user") {
         navigate("/user/dashboard");
       } else {
-        navigate("/admin/dashboard");
+        navigate("/admin/Dashboard");
       }
     } catch (err: any) {
       const serverMsg =
