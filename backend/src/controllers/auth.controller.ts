@@ -10,9 +10,9 @@ const signupSchema = z.object({
   name: z.string().min(3),
   email: z.string().email(),
   password: z.string().min(6),
-  siteId: z.string().min(1).optional(),
+  siteId: z.string().min(1),
   gender: z.enum(["male", "female", "other"]).optional(),
-  designation: z.string().min(1).optional(),
+  designation: z.string().min(1),
 });
 
 const signinSchema = z.object({
@@ -43,8 +43,7 @@ export const signup = async (req: Request, res: Response) => {
       email,
       password: hashedPassword,
       role: "admin",
-      siteId: siteId ? new Types.ObjectId(siteId) : undefined,
-
+      siteId: new Types.ObjectId(siteId),
       gender: gender || "other",
       designation,
     });
@@ -74,9 +73,8 @@ export const signin = async (req: Request, res: Response) => {
         .json({ message: "Invalid data" });
 
     const { email, password } = parsed.data;
-    console.log(parsed.data);
+
     const user = await User.findOne({ email });
-    console.log(user)
     if (!user || !(await bcrypt.compare(password, user.password)))
       return res
         .status(StatusCodes.UNAUTHORIZED)
